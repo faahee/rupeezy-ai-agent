@@ -170,16 +170,3 @@ Open [http://localhost:5173](http://localhost:5173) in **Chrome**.
 
 ---
 
-## Team
-
-| Role | Name |
-|------|------|
-| Full Stack Developer | [Your Name] |
-| AI/ML Lead | [Your Name] |
-| Product Designer | [Your Name] |
-
----
-
-## License
-
-MIT
