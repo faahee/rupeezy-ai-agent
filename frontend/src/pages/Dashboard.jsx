@@ -24,9 +24,9 @@ export default function Dashboard() {
         getAnalyticsFunnel(),
         getAnalyticsSummary(),
       ])
-      setLeads(leadsRes.data)
-      setFunnel(funnelRes.data)
-      setAnalyticsData(summaryRes.data)
+      setLeads(Array.isArray(leadsRes.data) ? leadsRes.data : [])
+      setFunnel(funnelRes.data && typeof funnelRes.data === 'object' ? funnelRes.data : null)
+      setAnalyticsData(summaryRes.data && typeof summaryRes.data === 'object' ? summaryRes.data : {})
     } catch (e) {
       console.error('Failed to fetch dashboard data', e)
     } finally {
