@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #050d1a;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0a1628;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1e3a5f;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00b4ff;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#00b4ff] text-[#050d1a] font-semibold px-4 py-2 rounded-lg hover:bg-[#0099dd] transition-colors duration-200 font-ui;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200;
+  }
+
+  .btn-ghost {
+    @apply border border-[#1e3a5f] text-slate-300 px-4 py-2 rounded-lg hover:border-[#00b4ff] hover:text-[#00b4ff] transition-colors duration-200;
+  }
+
+  .card {
+    @apply bg-[#0a1628] border border-[#1e3a5f] rounded-xl p-4;
+  }
+
+  .stat-card {
+    @apply bg-[#0f2040] border border-[#1e3a5f] rounded-xl p-4 flex flex-col gap-1;
+  }
+
+  .badge-hot {
+    @apply bg-red-900/60 text-red-300 border border-red-700 px-2 py-0.5 rounded-full text-xs font-semibold animate-pulse;
+  }
+
+  .badge-warm {
+    @apply bg-amber-900/60 text-amber-300 border border-amber-700 px-2 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .badge-cold {
+    @apply bg-slate-800 text-slate-400 border border-slate-600 px-2 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .badge-unqualified {
+    @apply bg-slate-900 text-slate-500 border border-slate-700 px-2 py-0.5 rounded-full text-xs font-semibold;
+  }
+}
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+.wave-bar {
+  animation: wave 1s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.5s ease-out infinite;
+}
