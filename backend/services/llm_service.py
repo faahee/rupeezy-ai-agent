@@ -2,6 +2,7 @@ import os
 import json
 import re
 import random
+import time
 import traceback
 from groq import Groq
 from knowledge.rupeezy_script import PROGRAM_BENEFITS, OPENING_SCRIPT, OPENING_SCRIPTS, OBJECTIONS, CLOSING_SCRIPT
@@ -435,24 +436,44 @@ IMPORTANT: response_text must be your actual spoken reply (max 30 words). Replac
             {"role": "system", "content": self.get_system_prompt(response_lang, lead_data.get("name", "there"))}
         ] + self.conversation_history
 
-        try:
-            completion = get_client().chat.completions.create(
-                model=MODEL,
-                messages=messages,
-                temperature=0.7,
-                max_tokens=350,
-            )
-            raw_response = completion.choices[0].message.content
-        except Exception as e:
-            error_msg = f"GROQ API ERROR: {type(e).__name__}: {e}"
-            print(error_msg)
+        raw_response = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                completion = get_client().chat.completions.create(
+                    model=MODEL,
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=350,
+                    timeout=15,
+                )
+                raw_response = completion.choices[0].message.content
+                break
+            except Exception as e:
+                last_error = e
+                print(f"GROQ API attempt {attempt+1}/3 failed: {type(e).__name__}: {e}")
+                if attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+
+        if raw_response is None:
             traceback.print_exc()
+            # Fallback responses so the call doesn't feel broken
+            fallback_replies = {
+                "english":   "Sorry, could you repeat that? I missed what you said.",
+                "hindi":     "माफ करें, क्या आप दोबारा बोल सकते हैं?",
+                "hinglish":  "Sorry yaar, kuch technical issue aa gayi. Phir se bolo please.",
+                "tamil":     "மன்னிக்கவும், மீண்டும் சொல்லுங்கள்.",
+                "kannada":   "ಕ್ಷಮಿಸಿ, ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಹೇಳಿ.",
+                "telugu":    "క్షమించండి, మళ్ళీ చెప్పగలరా?",
+                "malayalam": "ക്ഷമിക്കണം, ദയവായി വീണ്ടും പറയൂ.",
+            }
+            fallback_text = fallback_replies.get(detected_lang, fallback_replies["hinglish"])
             raw_response = json.dumps({
-                "response_text": "I apologize, I'm having a technical issue. Let me try again. Could you please repeat?",
+                "response_text": fallback_text,
                 "detected_language": detected_lang,
                 "objection_detected": "none",
                 "interest_signals": [],
-                "qualification_update": {"score_delta": 0, "reason": "technical error"},
+                "qualification_update": {"score_delta": 0, "reason": "api_error"},
                 "call_stage": self.call_stage,
                 "end_call": False
             })

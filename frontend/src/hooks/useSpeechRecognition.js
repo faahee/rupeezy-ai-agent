@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 
 const LANG_MAP = {
   hindi:    'hi-IN',
-  hinglish: 'hi-IN',
+  hinglish: 'en-IN', // en-IN keeps Hinglish in Roman script — LLM handles it better
   english:  'en-IN',
   tamil:    'ta-IN',
   kannada:  'kn-IN',

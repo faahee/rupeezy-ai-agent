@@ -45,6 +45,27 @@ def health():
     return {"status": "ok", "service": "RupeezyAI Voice Agent"}
 
 
+@app.get("/health/groq")
+async def health_groq():
+    """Test Groq API connectivity — useful for diagnosing Railway network issues."""
+    import httpx
+    key = os.getenv("GROQ_API_KEY", "")
+    if not key:
+        return {"status": "error", "detail": "GROQ_API_KEY env var not set"}
+    key_preview = key[:8] + "..." if len(key) > 8 else "(too short)"
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.get(
+                "https://api.groq.com/openai/v1/models",
+                headers={"Authorization": f"Bearer {key}"},
+            )
+        if r.status_code == 200:
+            return {"status": "ok", "key_preview": key_preview, "models_count": len(r.json().get("data", []))}
+        return {"status": "error", "http_status": r.status_code, "key_preview": key_preview, "body": r.text[:200]}
+    except Exception as e:
+        return {"status": "connection_error", "error": str(e), "key_preview": key_preview}
+
+
 FRONTEND_DIST = Path(__file__).parent / "frontend_dist"
 
 if FRONTEND_DIST.exists():
