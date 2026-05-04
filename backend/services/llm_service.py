@@ -4,18 +4,74 @@ import re
 import random
 import time
 import traceback
-from groq import Groq
 from knowledge.rupeezy_script import PROGRAM_BENEFITS, OPENING_SCRIPT, OPENING_SCRIPTS, OBJECTIONS, CLOSING_SCRIPT
 
-MODEL = "llama-3.1-8b-instant"
-_client = None
+ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
+GROQ_MODEL      = "llama-3.1-8b-instant"
+
+_anthropic_client = None
+_groq_client      = None
 
 
-def get_client():
-    global _client
-    if _client is None:
-        _client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-    return _client
+def _get_anthropic():
+    global _anthropic_client
+    if _anthropic_client is None:
+        from anthropic import Anthropic
+        _anthropic_client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    return _anthropic_client
+
+
+def _get_groq():
+    global _groq_client
+    if _groq_client is None:
+        from groq import Groq
+        _groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    return _groq_client
+
+
+def _call_llm(system_prompt: str, messages: list, max_tokens: int = 350) -> str:
+    """Try Anthropic first, fall back to Groq if Anthropic key not set."""
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
+    groq_key      = os.getenv("GROQ_API_KEY", "")
+
+    # Anthropic takes system separately; strip system role from history
+    user_messages = [m for m in messages if m["role"] != "system"]
+
+    if anthropic_key:
+        for attempt in range(3):
+            try:
+                resp = _get_anthropic().messages.create(
+                    model=ANTHROPIC_MODEL,
+                    max_tokens=max_tokens,
+                    system=system_prompt,
+                    messages=user_messages,
+                )
+                return resp.content[0].text
+            except Exception as e:
+                print(f"Anthropic attempt {attempt+1}/3: {type(e).__name__}: {e}")
+                if attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+        raise RuntimeError("Anthropic failed after 3 attempts")
+
+    if groq_key:
+        for attempt in range(3):
+            try:
+                from groq import Groq
+                completion = _get_groq().chat.completions.create(
+                    model=GROQ_MODEL,
+                    messages=[{"role": "system", "content": system_prompt}] + user_messages,
+                    temperature=0.7,
+                    max_tokens=max_tokens,
+                    timeout=15,
+                )
+                return completion.choices[0].message.content
+            except Exception as e:
+                print(f"Groq attempt {attempt+1}/3: {type(e).__name__}: {e}")
+                if attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+        raise RuntimeError("Groq failed after 3 attempts")
+
+    raise RuntimeError("No LLM API key — set ANTHROPIC_API_KEY or GROQ_API_KEY in Railway")
 
 DEVANAGARI_PATTERN = re.compile(r'[\u0900-\u097F]')
 TAMIL_PATTERN      = re.compile(r'[\u0B80-\u0BFF]')
@@ -432,31 +488,15 @@ IMPORTANT: response_text must be your actual spoken reply (max 30 words). Replac
             "content": user_message
         })
 
-        messages = [
-            {"role": "system", "content": self.get_system_prompt(response_lang, lead_data.get("name", "there"))}
-        ] + self.conversation_history
-
         raw_response = None
-        last_error = None
-        for attempt in range(3):
-            try:
-                completion = get_client().chat.completions.create(
-                    model=MODEL,
-                    messages=messages,
-                    temperature=0.7,
-                    max_tokens=350,
-                    timeout=15,
-                )
-                raw_response = completion.choices[0].message.content
-                break
-            except Exception as e:
-                last_error = e
-                print(f"GROQ API attempt {attempt+1}/3 failed: {type(e).__name__}: {e}")
-                if attempt < 2:
-                    time.sleep(1.5 * (attempt + 1))
+        try:
+            system_prompt = self.get_system_prompt(response_lang, lead_data.get("name", "there"))
+            raw_response = _call_llm(system_prompt, self.conversation_history)
+        except Exception as e:
+            print(f"LLM error: {type(e).__name__}: {e}")
+            traceback.print_exc()
 
         if raw_response is None:
-            traceback.print_exc()
             # Fallback responses so the call doesn't feel broken
             fallback_replies = {
                 "english":   "Sorry, could you repeat that? I missed what you said.",
