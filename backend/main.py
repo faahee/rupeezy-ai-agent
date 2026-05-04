@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import os
 from pathlib import Path
@@ -37,14 +39,27 @@ app.include_router(tts_router, prefix="/tts", tags=["tts"])
 app.include_router(stt_router, prefix="/stt", tags=["stt"])
 
 
-@app.get("/")
-def root():
-    return {"status": "RupeezyAI Backend Running"}
-
-
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "RupeezyAI Voice Agent"}
+
+
+FRONTEND_DIST = Path(__file__).parent / "frontend_dist"
+
+if FRONTEND_DIST.exists():
+    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
+
+    @app.get("/")
+    def root():
+        return FileResponse(str(FRONTEND_DIST / "index.html"))
+
+    @app.get("/{full_path:path}")
+    def serve_spa(full_path: str):
+        return FileResponse(str(FRONTEND_DIST / "index.html"))
+else:
+    @app.get("/")
+    def root():
+        return {"status": "RupeezyAI Backend Running"}
 
 
 if __name__ == "__main__":
