@@ -22,6 +22,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         os.getenv("FRONTEND_URL", "http://localhost:5173"),
+        "https://rupeezy-ai-agent.vercel.app",
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:5175",
