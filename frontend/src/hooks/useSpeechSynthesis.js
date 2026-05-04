@@ -1,6 +1,10 @@
 import { useState, useCallback, useRef } from 'react'
 
-const BACKEND_TTS_URL = 'http://localhost:8000/tts/speak'
+const API_BASE = import.meta.env.VITE_API_URL ||
+  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+    ? window.location.origin
+    : 'http://localhost:8000')
+const BACKEND_TTS_URL = `${API_BASE}/tts/speak`
 
 // ── Fallback: browser Web Speech API ─────────────────────────────────────────
 const PREFERRED_VOICE_NAMES = [

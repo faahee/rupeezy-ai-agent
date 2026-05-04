@@ -17,7 +17,11 @@ const LANG_WHISPER = {
   punjabi:  'pa',
 }
 
-const STT_URL       = 'http://localhost:8000/stt/transcribe'
+const API_BASE      = import.meta.env.VITE_API_URL ||
+  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+    ? window.location.origin
+    : 'http://localhost:8000')
+const STT_URL       = `${API_BASE}/stt/transcribe`
 const RMS_THRESHOLD = 0.010   // RMS above this = speech
 const SILENCE_MS    = 2500    // ms of quiet after speech → send to Whisper
 const MIN_SPEECH_MS = 400     // discard clips shorter than this
