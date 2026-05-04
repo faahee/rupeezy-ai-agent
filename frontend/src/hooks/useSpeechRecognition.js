@@ -218,23 +218,36 @@ export function useSpeechRecognition(language = 'hinglish') {
             recorderRef.current = nextRecorder
 
             try {
+              // Pick the right file extension so Whisper can identify the format.
+              // Safari/iOS records audio/mp4, Chrome records audio/webm — wrong
+              // extension causes Groq to reject the file silently.
+              const ext = mime.includes('mp4') ? 'm4a'
+                        : mime.includes('ogg') ? 'ogg'
+                        : 'webm'
               const form = new FormData()
-              form.append('audio', blob, 'audio.webm')
+              form.append('audio', blob, `audio.${ext}`)
               // Empty string → backend lets Whisper auto-detect the language
               form.append('language', LANG_WHISPER[language] ?? '')
               const res = await fetch(STT_URL, { method: 'POST', body: form })
-              if (!res.ok) throw new Error(`STT ${res.status}`)
+              if (!res.ok) {
+                const errText = await res.text().catch(() => '')
+                throw new Error(`STT ${res.status}: ${errText}`)
+              }
               if (sessionRef.current !== session) return
               const { text } = await res.json()
               if (text?.trim()) {
                 setTranscript(text.trim())
                 // Call the callback — it stays registered for subsequent turns
                 onSilenceRef.current?.(text.trim())
+              } else {
+                // Whisper returned empty — audio too short or too quiet, just reset
+                setTranscript('')
               }
             } catch (e) {
               console.error('STT failed:', e)
+              // Only show the error briefly — don't block the next listen attempt
               setTranscript('⚠️ Could not hear, speak again')
-              setTimeout(() => setTranscript(''), 2000)
+              setTimeout(() => setTranscript(''), 2500)
             } finally {
               processingRef.current = false
             }
