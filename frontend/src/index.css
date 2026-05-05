@@ -1,90 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
   body {
-    background-color: #050d1a;
+    background-color: #030b17;
     color: #e2e8f0;
     font-family: 'Inter', system-ui, sans-serif;
     margin: 0;
     padding: 0;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,180,255,0.07) 0%, transparent 100%);
+    background-attachment: fixed;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: #0a1628;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #1e3a5f;
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #00b4ff;
-  }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: #060e1c; }
+  ::-webkit-scrollbar-thumb { background: #1a3354; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00b4ff; }
 }
 
 @layer components {
+  /* ── Buttons ─────────────────────────────── */
   .btn-primary {
-    @apply bg-[#00b4ff] text-[#050d1a] font-semibold px-4 py-2 rounded-lg hover:bg-[#0099dd] transition-colors duration-200 font-ui;
+    @apply bg-gradient-to-r from-[#00b4ff] to-[#0088dd]
+           text-[#030b17] font-semibold px-4 py-2 rounded-lg
+           hover:from-[#00caff] hover:to-[#009aee]
+           shadow-lg shadow-[#00b4ff]/20
+           transition-all duration-200 active:scale-[0.97];
   }
 
   .btn-danger {
-    @apply bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200;
+    @apply bg-gradient-to-r from-red-600 to-red-700
+           text-white font-semibold px-4 py-2 rounded-lg
+           hover:from-red-500 hover:to-red-600
+           shadow-lg shadow-red-900/30
+           transition-all duration-200 active:scale-[0.97];
   }
 
   .btn-ghost {
-    @apply border border-[#1e3a5f] text-slate-300 px-4 py-2 rounded-lg hover:border-[#00b4ff] hover:text-[#00b4ff] transition-colors duration-200;
+    @apply border border-[#1e3a5f] text-slate-400 px-4 py-2 rounded-lg
+           hover:border-[#00b4ff]/60 hover:text-[#00b4ff] hover:bg-[#00b4ff]/5
+           transition-all duration-200;
   }
 
+  .btn-green {
+    @apply bg-gradient-to-r from-[#00e676] to-[#00c96a]
+           text-[#030b17] font-semibold px-4 py-2 rounded-lg
+           hover:from-[#00f07e] hover:to-[#00d970]
+           shadow-lg shadow-[#00e676]/20
+           transition-all duration-200 active:scale-[0.97];
+  }
+
+  /* ── Cards ───────────────────────────────── */
   .card {
-    @apply bg-[#0a1628] border border-[#1e3a5f] rounded-xl p-4;
+    @apply bg-[#080f1e] border border-[#162d50]/80 rounded-2xl p-4
+           shadow-xl shadow-black/20;
+  }
+
+  .card-glow {
+    @apply bg-[#080f1e] border border-[#00b4ff]/20 rounded-2xl p-4
+           shadow-xl shadow-[#00b4ff]/5;
   }
 
   .stat-card {
-    @apply bg-[#0f2040] border border-[#1e3a5f] rounded-xl p-4 flex flex-col gap-1;
+    @apply bg-gradient-to-b from-[#0d1f3a] to-[#080f1e]
+           border border-[#162d50]/80 rounded-2xl p-4 flex flex-col gap-1
+           hover:border-[#00b4ff]/30 transition-colors duration-200;
   }
 
+  /* ── Badges ──────────────────────────────── */
   .badge-hot {
-    @apply bg-red-900/60 text-red-300 border border-red-700 px-2 py-0.5 rounded-full text-xs font-semibold animate-pulse;
+    @apply bg-red-950/80 text-red-300 border border-red-700/60
+           px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
 
   .badge-warm {
-    @apply bg-amber-900/60 text-amber-300 border border-amber-700 px-2 py-0.5 rounded-full text-xs font-semibold;
+    @apply bg-amber-950/80 text-amber-300 border border-amber-700/60
+           px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
 
   .badge-cold {
-    @apply bg-slate-800 text-slate-400 border border-slate-600 px-2 py-0.5 rounded-full text-xs font-semibold;
+    @apply bg-slate-800/80 text-slate-400 border border-slate-600/60
+           px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
 
   .badge-unqualified {
-    @apply bg-slate-900 text-slate-500 border border-slate-700 px-2 py-0.5 rounded-full text-xs font-semibold;
+    @apply bg-slate-900/80 text-slate-500 border border-slate-700/60
+           px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  /* ── Input ───────────────────────────────── */
+  .input {
+    @apply w-full bg-[#0d1f3a] border border-[#1e3a5f] rounded-xl px-3 py-2.5
+           text-white text-sm placeholder-slate-600
+           focus:outline-none focus:border-[#00b4ff]/60 focus:ring-1 focus:ring-[#00b4ff]/20
+           transition-all duration-200;
+  }
+
+  /* ── Section label ───────────────────────── */
+  .section-label {
+    @apply text-xs font-semibold text-slate-500 uppercase tracking-widest;
   }
 }
 
+/* ── Animations ──────────────────────────────────── */
 @keyframes wave {
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
+  0%, 100% { transform: scaleY(0.25); }
+  50%       { transform: scaleY(1); }
 }
-
-.wave-bar {
-  animation: wave 1s ease-in-out infinite;
-}
+.wave-bar { animation: wave 1s ease-in-out infinite; }
 
 @keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(1.6); opacity: 0; }
+  0%   { transform: scale(1);   opacity: 0.7; }
+  100% { transform: scale(1.7); opacity: 0;   }
 }
+.pulse-ring { animation: pulse-ring 1.8s ease-out infinite; }
 
-.pulse-ring {
-  animation: pulse-ring 1.5s ease-out infinite;
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up { animation: fade-in-up 0.3s ease-out; }
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(0,180,255,0.06) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
 }

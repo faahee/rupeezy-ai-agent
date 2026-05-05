@@ -7,6 +7,15 @@ import useStore from '../store/useStore'
 
 const FILTERS = ['All', 'Hot', 'Warm', 'Cold']
 
+const STAT_CONFIG = [
+  { key: 'total_leads',     label: 'Total Leads',  icon: '👥', color: 'text-white',        border: 'border-l-slate-500' },
+  { key: 'hot_leads',       label: 'Hot Leads',    icon: '🔥', color: 'text-red-400',      border: 'border-l-red-500' },
+  { key: 'warm_leads',      label: 'Warm Leads',   icon: '☀️', color: 'text-amber-400',    border: 'border-l-amber-500' },
+  { key: 'cold_leads',      label: 'Cold Leads',   icon: '❄️', color: 'text-slate-400',    border: 'border-l-slate-600' },
+  { key: 'average_score',   label: 'Avg Score',    icon: '📊', color: 'text-[#00b4ff]',   border: 'border-l-[#00b4ff]' },
+  { key: 'conversion_rate', label: 'Conversion',   icon: '✅', color: 'text-[#00e676]',   border: 'border-l-[#00e676]', suffix: '%' },
+]
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const { leads, setLeads, setAnalyticsData, analyticsData } = useStore()
@@ -60,51 +69,54 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      {/* Header */}
+
+      {/* ── Header ── */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white font-ui">Partner Lead Dashboard</h1>
-          <p className="text-slate-400 text-sm mt-1">AI-powered lead qualification and RM handoff</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Partner Lead Dashboard</h1>
+          <p className="text-slate-500 text-sm mt-1">AI-powered lead qualification &amp; RM handoff</p>
         </div>
         <button
           onClick={() => setShowNewLead(true)}
-          className="btn-primary flex items-center gap-2"
+          className="btn-primary flex items-center gap-2 text-sm"
         >
-          <span className="text-lg leading-none">+</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+          </svg>
           Start New Call
         </button>
       </div>
 
-      {/* Stats Row */}
+      {/* ── Stats Row ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-        {[
-          { label: 'Total Leads', value: stats?.total_leads ?? '—', color: 'text-white' },
-          { label: 'Hot Leads', value: stats?.hot_leads ?? '—', color: 'text-red-400' },
-          { label: 'Warm Leads', value: stats?.warm_leads ?? '—', color: 'text-amber-400' },
-          { label: 'Cold Leads', value: stats?.cold_leads ?? '—', color: 'text-slate-400' },
-          { label: 'Avg Score', value: stats?.average_score ?? '—', color: 'text-[#00b4ff]' },
-          { label: 'Conversion', value: stats?.conversion_rate ? `${stats.conversion_rate}%` : '—', color: 'text-[#00e676]' },
-        ].map((s) => (
-          <div key={s.label} className="stat-card">
-            <span className={`text-2xl font-bold font-mono ${s.color}`}>{s.value}</span>
-            <span className="text-xs text-slate-500 uppercase tracking-wider">{s.label}</span>
-          </div>
-        ))}
+        {STAT_CONFIG.map((s) => {
+          const raw = stats?.[s.key]
+          const val = raw !== undefined && raw !== null ? `${raw}${s.suffix || ''}` : '—'
+          return (
+            <div key={s.label} className={`stat-card border-l-2 ${s.border}`}>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-base leading-none">{s.icon}</span>
+                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">{s.label}</span>
+              </div>
+              <span className={`text-2xl font-bold ${s.color}`}>{val}</span>
+            </div>
+          )
+        })}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Lead List */}
+        {/* ── Lead List ── */}
         <div className="lg:col-span-2">
           {/* Filter Tabs */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-5">
             {FILTERS.map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                className={`px-4 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   filter === f
-                    ? 'bg-[#00b4ff] text-[#050d1a]'
-                    : 'bg-[#0f2040] border border-[#1e3a5f] text-slate-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-[#00b4ff] to-[#0088dd] text-[#030b17] shadow-lg shadow-[#00b4ff]/20'
+                    : 'bg-[#080f1e] border border-[#162d50] text-slate-400 hover:text-white hover:border-[#00b4ff]/40'
                 }`}
               >
                 {f}
@@ -113,10 +125,16 @@ export default function Dashboard() {
           </div>
 
           {loading ? (
-            <div className="text-center py-12 text-slate-500 font-mono">Loading leads...</div>
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="card shimmer h-24 opacity-40" />
+              ))}
+            </div>
           ) : leads.length === 0 ? (
-            <div className="text-center py-12 text-slate-500 font-mono">
-              No leads found. Start a new call to add leads.
+            <div className="card flex flex-col items-center justify-center py-16 text-center">
+              <div className="text-4xl mb-3">📭</div>
+              <p className="text-slate-400 font-medium">No leads found</p>
+              <p className="text-slate-600 text-sm mt-1">Start a new call to add leads.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -127,17 +145,14 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Right Panel */}
+        {/* ── Right Panel ── */}
         <div className="flex flex-col gap-4">
           <FunnelChart data={funnel} />
 
-          {/* Quick Stats */}
           <div className="card">
-            <h3 className="text-sm font-semibold text-slate-300 mb-3 font-mono uppercase tracking-wider">
-              Lead Sources
-            </h3>
+            <h3 className="section-label mb-4">Lead Sources</h3>
             {leads.length > 0 ? (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {Object.entries(
                   leads.reduce((acc, l) => {
                     acc[l.source] = (acc[l.source] || 0) + 1
@@ -146,51 +161,66 @@ export default function Dashboard() {
                 ).map(([source, count]) => (
                   <div key={source} className="flex items-center justify-between">
                     <span className="text-slate-400 text-sm">{source}</span>
-                    <span className="text-[#00b4ff] font-mono text-sm">{count}</span>
+                    <span className="text-[#00b4ff] font-semibold text-sm tabular-nums">{count}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 text-sm">No data yet</p>
+              <p className="text-slate-600 text-sm">No data yet</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* New Lead Modal */}
+      {/* ── New Lead Modal ── */}
       {showNewLead && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0a1628] border border-[#1e3a5f] rounded-2xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-bold text-white mb-4">Add New Lead</h2>
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#080f1e] border border-[#162d50] rounded-2xl p-6 w-full max-w-md shadow-2xl fade-in-up">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-lg font-bold text-white">New Lead Call</h2>
+                <p className="text-slate-500 text-xs mt-0.5">Ana will call immediately after you submit</p>
+              </div>
+              <button
+                onClick={() => setShowNewLead(false)}
+                className="text-slate-500 hover:text-white transition-colors p-1"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
             <form onSubmit={handleCreateLead} className="flex flex-col gap-4">
               <div>
-                <label className="text-slate-400 text-sm block mb-1">Name *</label>
+                <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider block mb-1.5">Name *</label>
                 <input
                   required
                   value={newLead.name}
                   onChange={(e) => setNewLead({ ...newLead, name: e.target.value })}
-                  className="w-full bg-[#0f2040] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00b4ff]"
-                  placeholder="Lead name"
+                  className="input"
+                  placeholder="Lead full name"
                 />
               </div>
               <div>
-                <label className="text-slate-400 text-sm block mb-1">Phone *</label>
+                <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider block mb-1.5">Phone *</label>
                 <input
                   required
                   value={newLead.phone}
                   onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })}
-                  className="w-full bg-[#0f2040] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00b4ff]"
+                  className="input"
                   placeholder="9876543210"
                 />
               </div>
               <div>
-                <label className="text-slate-400 text-sm block mb-1">Language</label>
+                <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider block mb-1.5">Language</label>
                 <select
                   value={newLead.language_hint}
                   onChange={(e) => setNewLead({ ...newLead, language_hint: e.target.value })}
-                  className="w-full bg-[#0f2040] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00b4ff]"
+                  className="input"
                 >
-                  <option value="hinglish">Hinglish (Hindi+English)</option>
+                  <option value="hinglish">Hinglish (Hindi + English)</option>
                   <option value="hindi">Hindi</option>
                   <option value="english">English</option>
                   <option value="tamil">Tamil</option>
@@ -205,28 +235,20 @@ export default function Dashboard() {
                 </select>
               </div>
               <div>
-                <label className="text-slate-400 text-sm block mb-1">Source</label>
+                <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider block mb-1.5">Source</label>
                 <input
                   value={newLead.source}
                   onChange={(e) => setNewLead({ ...newLead, source: e.target.value })}
-                  className="w-full bg-[#0f2040] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00b4ff]"
-                  placeholder="Instagram Campaign"
+                  className="input"
+                  placeholder="e.g. Instagram Campaign"
                 />
               </div>
-              <div className="flex gap-3 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowNewLead(false)}
-                  className="btn-ghost flex-1"
-                >
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowNewLead(false)} className="btn-ghost flex-1">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="btn-primary flex-1 disabled:opacity-50"
-                >
-                  {creating ? 'Starting...' : 'Start Call'}
+                <button type="submit" disabled={creating} className="btn-primary flex-1 disabled:opacity-50">
+                  {creating ? 'Starting...' : '📞 Start Call'}
                 </button>
               </div>
             </form>
@@ -236,3 +258,4 @@ export default function Dashboard() {
     </div>
   )
 }
+

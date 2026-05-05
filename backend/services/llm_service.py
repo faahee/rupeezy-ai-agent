@@ -266,6 +266,12 @@ class ConversationManager:
 
     def detect_language(self, text: str) -> str:
         """Detect script from user text. Falls back to preferred_language if no script detected."""
+        # ── Bare language name (e.g. user just says "Tamil" or "Hindi") ───────
+        stripped_lower = text.strip().lower().rstrip('.')
+        if stripped_lower in self._LANG_NAMES:
+            detected = self._LANG_NAMES[stripped_lower]
+            self.preferred_language = detected
+            return detected
         # ── Explicit language switch request takes highest priority ──────────
         sw = self._LANG_SWITCH.search(text)
         if sw:

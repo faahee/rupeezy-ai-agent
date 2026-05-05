@@ -186,13 +186,11 @@ export default function VoiceCall() {
       // while still blocking pure mic-echo repeats of the bot's sentence.
       const botLower = lastBotMsgRef.current.toLowerCase()
       const userWords = userText.toLowerCase().trim().split(/\s+/).filter(w => w.length > 2)
-      if (userWords.length >= 2) {
+      if (userWords.length >= 4) {
         const matchCount = userWords.filter(w => botLower.includes(w)).length
         const newWordCount = userWords.length - matchCount
-        if (matchCount / userWords.length > 0.65 && newWordCount < 3) return
+        if (matchCount / userWords.length > 0.85 && newWordCount < 2) return
       }
-      // Single word echo: only block if the utterance is exactly one word (no context)
-      if (userWords.length === 1 && botLower.includes(userWords[0])) return
       lastUserMessageRef.current = userText
       stopListening()
       setLiveTranscript('')
@@ -319,177 +317,162 @@ export default function VoiceCall() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 h-[calc(100vh-64px)] flex flex-col gap-4">
-      {/* Lead Info Bar */}
-      <div className="flex items-center justify-between card py-3">
-        <div className="flex items-center gap-4">
-          <div>
-            <h2 className="font-bold text-white text-lg">{lead?.name || 'Loading...'}</h2>
-            <p className="text-slate-400 text-sm font-mono">{lead?.phone}</p>
+    <div className="max-w-5xl mx-auto px-4 py-5 h-[calc(100vh-60px)] flex flex-col gap-4">
+
+      {/* ── Lead Info Bar ── */}
+      <div className="flex items-center justify-between card py-3 px-5">
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Avatar */}
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1a3a6e] to-[#0d1f3a] border border-[#1e3a5f] flex items-center justify-center flex-shrink-0">
+            <span className="text-[#00b4ff] font-bold text-sm">
+              {lead?.name?.charAt(0).toUpperCase() || '?'}
+            </span>
+          </div>
+          <div className="min-w-0">
+            <h2 className="font-semibold text-white text-base leading-tight truncate">{lead?.name || 'Loading...'}</h2>
+            <p className="text-slate-500 text-xs">{lead?.phone}</p>
           </div>
           <ScoreBadge classification={classification} />
-          <span
-            className={`text-xs font-mono uppercase tracking-wider ${STAGE_COLORS[callStage] || 'text-slate-400'}`}
-          >
+          <span className={`hidden sm:block text-xs font-semibold uppercase tracking-widest ${STAGE_COLORS[callStage] || 'text-slate-500'}`}>
             {callStage}
           </span>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <div className="text-[#00b4ff] font-mono text-xl font-bold">{formatTime(callDuration)}</div>
-            <div className="text-slate-500 text-xs">Duration</div>
+            <div className="text-[#00b4ff] font-mono text-xl font-bold tabular-nums">{formatTime(callDuration)}</div>
+            <div className="text-slate-600 text-[10px] uppercase tracking-wider">Duration</div>
           </div>
-          <button
-            onClick={() => handleEndCall(false)}
-            className="btn-danger px-5 py-2 text-sm"
-          >
+          <button onClick={() => handleEndCall(false)} className="btn-danger px-4 py-2 text-sm">
             End Call
           </button>
         </div>
       </div>
 
       <div className="flex-1 grid lg:grid-cols-5 gap-4 min-h-0">
-        {/* Left: Bot Visual */}
-        <div className="lg:col-span-2 card flex flex-col items-center justify-center gap-6">
-          {/* Avatar with pulse */}
-          <div className="relative">
-            <div
-              className={`w-24 h-24 rounded-full bg-gradient-to-br from-[#00b4ff] to-[#0066ff] flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-[#00b4ff]/20 ${
-                isSpeaking ? 'ring-4 ring-[#00b4ff]/40' : ''
-              }`}
-            >
-              P
-            </div>
-            {isSpeaking && (
-              <>
-                <div className="absolute inset-0 rounded-full bg-[#00b4ff]/20 pulse-ring" />
-                <div
-                  className="absolute inset-0 rounded-full bg-[#00b4ff]/10 pulse-ring"
-                  style={{ animationDelay: '0.5s' }}
-                />
-              </>
-            )}
-          </div>
 
-          <div className="text-center">
-            <p className="text-white font-semibold">Ana</p>
-            <p className="text-slate-400 text-sm">AI Sales Agent · Rupeezy</p>
-          </div>
+        {/* ── Left: Agent Visual ── */}
+        <div className="lg:col-span-2 card flex flex-col items-center justify-between gap-4 py-6">
 
-          {/* Waveform */}
-          <Waveform isActive={isSpeaking} />
-
-          {/* State indicator */}
-          <div className="flex flex-col items-center gap-2 w-full">
-            <div className="flex items-center gap-2">
+          {/* Avatar */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative">
               <div
-                className={`w-2.5 h-2.5 rounded-full ${
-                  callState === 'bot_speaking'
-                    ? 'bg-[#00b4ff] animate-pulse'
-                    : callState === 'listening'
-                    ? 'bg-[#00e676] animate-pulse'
-                    : callState === 'thinking'
-                    ? 'bg-amber-400 animate-pulse'
-                    : callState === 'mic_error'
-                    ? 'bg-red-500'
-                    : 'bg-slate-600'
+                className={`w-24 h-24 rounded-full bg-gradient-to-br from-[#00b4ff] to-[#0055cc] flex items-center justify-center text-3xl font-bold text-white shadow-xl shadow-[#00b4ff]/25 transition-all duration-300 ${
+                  isSpeaking ? 'ring-4 ring-[#00b4ff]/40 scale-105' : ''
+                }`}
+              >
+                A
+              </div>
+              {isSpeaking && (
+                <>
+                  <div className="absolute inset-0 rounded-full bg-[#00b4ff]/20 pulse-ring" />
+                  <div className="absolute inset-0 rounded-full bg-[#00b4ff]/10 pulse-ring" style={{ animationDelay: '0.6s' }} />
+                </>
+              )}
+            </div>
+            <div className="text-center">
+              <p className="text-white font-semibold">Ana</p>
+              <p className="text-slate-500 text-xs">AI Sales Agent · Rupeezy</p>
+            </div>
+            <Waveform isActive={isSpeaking} />
+          </div>
+
+          {/* Status indicator */}
+          <div className="flex flex-col items-center gap-2 w-full px-2">
+            <div className="flex items-center gap-2 bg-[#0d1f3a] border border-[#162d50] rounded-full px-4 py-2">
+              <div
+                className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                  callState === 'bot_speaking' ? 'bg-[#00b4ff] animate-pulse' :
+                  callState === 'listening'    ? 'bg-[#00e676] animate-pulse' :
+                  callState === 'thinking'     ? 'bg-amber-400 animate-pulse' :
+                  callState === 'mic_error'    ? 'bg-red-500' :
+                  'bg-slate-600'
                 }`}
               />
-              <span className="text-xs font-mono text-slate-400 capitalize">
-                {callState === 'bot_speaking'
-                  ? 'Agent speaking...'
-                  : callState === 'listening'
-                  ? 'Listening...'
-                  : callState === 'thinking'
-                  ? 'Thinking...'
-                  : callState === 'mic_error'
-                  ? 'Mic error'
-                  : callState}
+              <span className="text-xs font-medium text-slate-300">
+                {callState === 'bot_speaking' ? 'Agent speaking...' :
+                 callState === 'listening'    ? 'Listening...' :
+                 callState === 'thinking'     ? 'Processing...' :
+                 callState === 'mic_error'    ? 'Mic error' : callState}
               </span>
             </div>
-            {/* Barge-in button — visible while bot is speaking */}
+
             {callState === 'bot_speaking' && (
               <button
                 onClick={handleBargeIn}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold
-                           bg-amber-500/20 border border-amber-500/50 text-amber-300
-                           hover:bg-amber-500/40 active:scale-95 transition-all"
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-amber-500/15 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 active:scale-95 transition-all"
               >
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                 Interrupt / Speak
               </button>
             )}
-          </div>
 
-          {/* Score */}
-          <div className="w-full bg-[#0f2040] rounded-xl p-3 border border-[#1e3a5f]">
-            <div className="flex justify-between mb-2">
-              <span className="text-xs text-slate-400 font-mono">Interest Score</span>
-              <span className="text-xs font-mono text-[#00b4ff] font-bold">{currentScore}/100</span>
-            </div>
-            <div className="h-2 bg-[#152a52] rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  currentScore >= 70
-                    ? 'bg-gradient-to-r from-red-500 to-red-400'
-                    : currentScore >= 40
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-400'
-                    : 'bg-gradient-to-r from-slate-600 to-slate-500'
-                }`}
-                style={{ width: `${currentScore}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Language + Objection */}
-          <div className="flex flex-col gap-2 w-full">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Language</span>
-              <span className="bg-[#0f2040] border border-[#1e3a5f] text-[#00b4ff] px-2 py-0.5 rounded-full font-mono capitalize">
-                {currentLanguage}
-              </span>
-            </div>
             {!isSupported && (
-              <p className="text-xs text-amber-400 text-center">
-                ⚠️ Use Chrome for voice input
-              </p>
+              <p className="text-xs text-amber-400 text-center">⚠ Use Chrome for voice input</p>
             )}
             {micError && (
               <div className="flex flex-col items-center gap-1">
                 <p className="text-xs text-red-400 text-center">⛔ {micError}</p>
-                <button
-                  onClick={() => handleListenForUser()}
-                  className="text-xs text-[#00b4ff] underline"
-                >
-                  Retry mic
-                </button>
+                <button onClick={() => handleListenForUser()} className="text-xs text-[#00b4ff] underline">Retry mic</button>
               </div>
             )}
             {objectionAlert && (
-              <div className="bg-amber-900/40 border border-amber-700 rounded-lg p-2 text-xs text-amber-300 text-center animate-pulse">
+              <div className="bg-amber-950/60 border border-amber-700/60 rounded-xl px-3 py-2 text-xs text-amber-300 text-center">
                 ⚡ Objection: {objectionAlert}
               </div>
             )}
           </div>
+
+          {/* Score + Meta */}
+          <div className="w-full space-y-3 px-2">
+            {/* Score */}
+            <div className="bg-[#0d1f3a] rounded-xl p-3 border border-[#162d50]">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Interest Score</span>
+                <span className="text-sm font-bold text-[#00b4ff] tabular-nums">{currentScore}/100</span>
+              </div>
+              <div className="h-1.5 bg-[#0a1628] rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${
+                    currentScore >= 70 ? 'bg-gradient-to-r from-red-500 to-red-400' :
+                    currentScore >= 40 ? 'bg-gradient-to-r from-amber-500 to-amber-400' :
+                                        'bg-gradient-to-r from-slate-600 to-slate-500'
+                  }`}
+                  style={{ width: `${currentScore}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Language */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-500">Language</span>
+              <span className="bg-[#0d1f3a] border border-[#1e3a5f] text-[#00b4ff] px-2.5 py-0.5 rounded-full font-medium capitalize">
+                {currentLanguage}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Right: Transcript */}
+        {/* ── Right: Transcript ── */}
         <div className="lg:col-span-3 card flex flex-col min-h-0">
-          <div className="flex items-center justify-between mb-3 flex-shrink-0">
-            <h3 className="text-sm font-semibold text-slate-300 font-mono uppercase tracking-wider">
-              Live Transcript
-            </h3>
-            <span className="text-xs text-slate-500 font-mono">{messages.length} messages</span>
+          <div className="flex items-center justify-between mb-3 flex-shrink-0 pb-3 border-b border-[#162d50]">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[#00e676] animate-pulse" />
+              <h3 className="text-sm font-semibold text-white">Live Transcript</h3>
+            </div>
+            <span className="text-xs text-slate-500 bg-[#0d1f3a] border border-[#162d50] px-2 py-0.5 rounded-full tabular-nums">
+              {messages.length} messages
+            </span>
           </div>
 
           <div className="flex-1 overflow-y-auto min-h-0">
             <Transcript messages={messages} />
           </div>
 
-          {/* Live STT */}
           {isListening && liveTranscript && (
-            <div className="mt-2 flex-shrink-0 bg-[#00e676]/10 border border-[#00e676]/30 rounded-lg p-2 text-sm text-[#00e676] font-mono">
-              🎤 {liveTranscript}
+            <div className="mt-2 flex-shrink-0 bg-[#00e676]/8 border border-[#00e676]/25 rounded-xl p-2.5 text-sm text-[#00e676] flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#00e676] animate-pulse flex-shrink-0" />
+              {liveTranscript}
             </div>
           )}
         </div>
@@ -497,3 +480,4 @@ export default function VoiceCall() {
     </div>
   )
 }
+

@@ -7,20 +7,32 @@ const API_BASE = import.meta.env.VITE_API_URL ||
 const BACKEND_TTS_URL = `${API_BASE}/tts/speak`
 
 // ── Fallback: browser Web Speech API ─────────────────────────────────────────
-const PREFERRED_VOICE_NAMES = [
-  'Google हिन्दी',
-  'Microsoft Hemant - Hindi (India)',
-  'Microsoft Kalpana - Hindi (India)',
-  'hi-IN',
-]
+const LANG_TO_LOCALE = {
+  hindi:     'hi-IN',
+  hinglish:  'en-IN',
+  english:   'en-IN',
+  tamil:     'ta-IN',
+  kannada:   'kn-IN',
+  telugu:    'te-IN',
+  malayalam: 'ml-IN',
+  bengali:   'bn-IN',
+  marathi:   'mr-IN',
+  gujarati:  'gu-IN',
+  punjabi:   'pa-IN',
+  urdu:      'ur-IN',
+}
 
 function getBrowserVoice(language) {
   const voices = window.speechSynthesis.getVoices()
-  if (language === 'hindi') {
-    for (const name of PREFERRED_VOICE_NAMES) {
-      const v = voices.find((v) => v.name.includes(name) || v.lang === 'hi-IN')
-      if (v) return v
-    }
+  const locale = LANG_TO_LOCALE[language]
+  if (locale) {
+    // Try exact locale match first (e.g. ta-IN)
+    const exact = voices.find((v) => v.lang === locale)
+    if (exact) return exact
+    // Try language prefix match (e.g. ta-*)
+    const prefix = locale.split('-')[0]
+    const partial = voices.find((v) => v.lang.startsWith(prefix + '-') || v.lang === prefix)
+    if (partial) return partial
   }
   return voices.find((v) => v.lang === 'en-IN') ||
     voices.find((v) => v.lang.startsWith('en')) ||
