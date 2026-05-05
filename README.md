@@ -1,18 +1,124 @@
-﻿# RupeezyAI - AI Voice Agent for Partner Lead Conversion
-
-> An AI-powered browser voice agent that calls leads, pitches Rupeezy's partner program in Hindi/English/Hinglish, handles objections, qualifies leads as Hot/Warm/Cold, and provides an RM dashboard with analytics.
+﻿# RupeezyAI
 
 ---
 
-## Problem Statement
-
-Financial product distribution companies lose significant revenue because human RMs cannot contact all inbound leads in time. Cold leads go stale, follow-ups are inconsistent, and objection handling depends heavily on RM skill. There is no scalable, consistent way to pitch and qualify hundreds of leads per day.
+> ## "AI Voice Agent That Qualifies Your Leads — While You Sleep"
+>
+> *Every lead gets called. Every conversation is scored. Only the best reach your team.*
 
 ---
 
-## Solution Overview
+> **Stop losing leads to slow follow-ups.**
+> Ana, your AI voice agent, picks up where your team can't — calling every inbound lead, speaking their language, handling every objection, and handing you only the ones worth your time.
+>
+> *Built for scale. Designed for closers.*
 
-RupeezyAI deploys an AI voice agent (Ana) that runs entirely in the browser. Ana calls leads, delivers a personalized pitch in their preferred language (Hindi/English/Hinglish), detects and handles the 5 most common objections using a built-in knowledge base, and scores each lead as Hot/Warm/Cold in real-time. After the call, a post-call summary with RM handoff context and a pre-written WhatsApp message is auto-generated. All data is visible on a live RM dashboard with conversion funnel analytics.
+---
+
+> "Your best RM works 9 to 6. Ana works 24/7 — and never misses a lead."
+
+---
+
+## What Is RupeezyAI?
+
+RupeezyAI is an AI-powered voice agent platform built for financial product distribution. It deploys a browser-native AI agent named **Ana** that autonomously calls leads, delivers personalized pitches in **Hindi, English, or Hinglish**, detects and resolves objections using a built-in knowledge base, and scores every conversation in real-time as **Hot / Warm / Cold**.
+
+Post-call, a structured summary with RM handoff context and a pre-written WhatsApp message is auto-generated — so your human team only touches the leads that are ready to convert.
+
+**No telephony setup. No call center. Just a browser and an API key.**
+
+---
+
+## The Problem It Solves
+
+Financial product distribution companies lose significant revenue because human RMs cannot contact all inbound leads in time. Cold leads go stale, follow-ups are inconsistent, and objection handling depends entirely on individual RM skill. There is no scalable, consistent way to pitch and qualify hundreds of leads per day.
+
+| Pain Point | What RupeezyAI Does |
+|---|---|
+| Leads go stale before RM calls | Ana calls instantly, 24/7 |
+| Inconsistent pitching quality | Same perfect pitch every time |
+| Objections handled poorly | 5 built-in objections with rebuttals |
+| No visibility on lead quality | Live 0–100 interest score per call |
+| RM spends time on cold leads | Only Hot leads reach the RM |
+| No follow-up context | Auto-generated RM handoff summary |
+
+---
+
+## How Ana Works
+
+Ana is the AI voice agent. Here is the full lifecycle of a call:
+
+```
+Lead enters system
+       │
+       ▼
+Ana speaks opening pitch (language auto-detected: Hindi / English / Hinglish)
+       │
+       ▼
+Lead responds (browser STT captures speech)
+       │
+       ▼
+LLM (Llama 3.3 70B via Groq) processes response:
+  - Detects language
+  - Identifies objection (if any)
+  - Selects knowledge-base rebuttal
+  - Updates interest score (delta ±10 per turn, server signals authoritative)
+  - Decides next call stage: opening → pitching → objection → closing
+       │
+       ▼
+Ana speaks reply (browser TTS)
+       │
+       ▼
+Loop until: lead qualifies OR call ends
+       │
+       ▼
+Post-call summary generated:
+  - Interest score (0–100)
+  - Classification: Hot / Warm / Cold
+  - Key discussion points
+  - RM handoff context paragraph
+  - Pre-written WhatsApp message
+```
+
+---
+
+## Lead Intelligence — Scoring System
+
+Every conversation produces a real-time interest score (0–100) based on weighted signals:
+
+| Signal | Weight | Meaning |
+|---|---|---|
+| `explicit_interest` | +25 | Lead directly expressed interest |
+| `asked_for_details` | +20 | Lead asked about onboarding, earnings, or process |
+| `network_mentioned` | +20 | Lead mentioned having a client/partner network |
+| `engagement_long` | +15 | Conversation had more than 6 turns |
+| `objection_resolved` | +10 | Lead accepted a rebuttal |
+| `language_match` | +5 | Ana spoke in lead's preferred language |
+| `multiple_objections` | -15 | Lead raised 3+ objections |
+| `wants_to_think` | -10 | Lead said "I'll think about it" |
+| `negative_response` | -20 | Lead gave explicit rejection |
+
+### Classification Thresholds
+
+| Score | Classification | Action |
+|---|---|---|
+| ≥ 70 | 🔥 **Hot** | Transfer to RM immediately |
+| 40 – 69 | ☀️ **Warm** | Send WhatsApp follow-up link |
+| < 40 | ❄️ **Cold** | Log for re-engagement in 30 days |
+
+The LLM contributes a `score_delta` (clamped to ±10 per turn) on top of deterministic server-side signals. Server signals are always authoritative.
+
+---
+
+## Objection Handling
+
+Ana handles the 5 most common objections in the Rupeezy partner program context, with language-matched rebuttals in Hindi, English, and Hinglish:
+
+1. **"I don't have time"** — Rebuttal around low time commitment and passive income
+2. **"I don't trust online platforms"** — SEBI registration, track record, partner count
+3. **"Commission is too low"** — Tiered commission structure, volume bonuses
+4. **"My clients won't be interested"** — Target audience framing, high-yield products
+5. **"I need to think about it"** — Urgency framing, limited onboarding slots
 
 ---
 
@@ -27,146 +133,115 @@ RupeezyAI deploys an AI voice agent (Ana) that runs entirely in the browser. Ana
 │   Zustand          Web Speech API          Axios API            │
 │   Store            STT + TTS               Calls                │
 └──────────────────────────┬───────────────────────────────────────┘
-                           │ HTTP REST (localhost:8000)
+                           │ HTTP REST
 ┌──────────────────────────▼───────────────────────────────────────┐
-│                     FastAPI Backend                              │
+│                     FastAPI Backend (Python)                     │
 │                                                                  │
-│  /leads  /conversation  /qualification  /analytics              │
-│       │          │                                              │
-│   In-Memory    LLM Service  ──►  Groq API (Llama 3.3 70B)      │
-│   Database     Summary Svc  ──►  Post-call summary              │
-│                Qualification ──► Hot/Warm/Cold scoring           │
+│  /leads  /conversation  /qualification  /analytics  /stt  /tts  │
+│       │          │                                               │
+│   In-Memory    LLM Service  ──►  Groq API (Llama 3.3 70B)       │
+│   Database     Summary Svc  ──►  Post-call summary generation    │
+│                Qualification ──► Hot/Warm/Cold scoring engine    │
+│                Knowledge Base ──► Objection rebuttals            │
 └──────────────────────────────────────────────────────────────────┘
 ```
+
+### Key Files
+
+| Path | Role |
+|---|---|
+| `backend/services/llm_service.py` | ConversationManager, system prompt, score delta logic |
+| `backend/services/qualification_service.py` | Signal weights, classify(), compute_score() |
+| `backend/services/summary_service.py` | Post-call summary generation via Groq |
+| `backend/knowledge/rupeezy_script.py` | Pitch scripts + objection rebuttals knowledge base |
+| `backend/routes/conversation.py` | /start, /message, /end endpoints |
+| `backend/routes/leads.py` | CRUD for leads |
+| `backend/routes/analytics.py` | Funnel + summary stats |
+| `backend/database.py` | In-memory leads/conversations/summaries store |
+| `frontend/src/pages/VoiceCall.jsx` | Main call UI, Web Speech loop |
+| `frontend/src/pages/Dashboard.jsx` | Lead cards + funnel chart |
+| `frontend/src/pages/CallSummary.jsx` | Post-call results + actions |
+| `frontend/src/components/LeadCard.jsx` | Score bar + Hot/Warm/Cold badge |
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend Framework | React 18 + Vite |
-| Styling | Tailwind CSS |
-| State Management | Zustand |
-| HTTP Client | Axios |
-| Charts | Recharts |
-| Routing | React Router v6 |
-| STT | Web Speech API (browser-native) |
-| TTS | Web Speech Synthesis API (browser-native) |
-| Backend Framework | FastAPI (Python 3.10+) |
-| LLM | Groq API — Llama 3.3 70B Versatile |
-| Database | In-memory Python dict (MongoDB optional) |
-| Env Config | python-dotenv |
+| Layer | Technology | Why |
+|---|---|---|
+| Frontend Framework | React 18 + Vite | Fast HMR, component model |
+| Styling | Tailwind CSS | Utility-first, dark UI |
+| State Management | Zustand | Lightweight global store |
+| HTTP Client | Axios | REST calls to FastAPI |
+| Charts | Recharts | Funnel + bar charts |
+| Routing | React Router v6 | SPA page routing |
+| Speech-to-Text | Web Speech API | 100% free, browser-native |
+| Text-to-Speech | Web Speech Synthesis | 100% free, browser-native |
+| Backend Framework | FastAPI (Python 3.10+) | Async, auto-docs at /docs |
+| LLM | Groq — Llama 3.3 70B Versatile | Free tier, extremely fast inference |
+| Summary LLM | Groq — Llama 3.1 8B Instant | Lightweight, fast post-call generation |
+| Database | In-memory Python dict | Zero infra for demo; MongoDB-ready |
+| Config | python-dotenv | .env file management |
 
 ---
 
-## Environment Variables
+## Full API Reference
 
-Create `backend/.env` from `backend/.env.example`:
+### Leads
 
-| Variable | Description |
-|----------|-------------|
-| `GROQ_API_KEY` | Free API key from [console.groq.com](https://console.groq.com) |
-| `MONGODB_URI` | Optional MongoDB connection string |
-| `FRONTEND_URL` | Frontend URL for CORS (default: http://localhost:5173) |
-| `PORT` | Backend port (default: 8000) |
+| Method | Endpoint | Body | Description |
+|---|---|---|---|
+| `POST` | `/leads` | `{name, phone, language_hint, source}` | Create new lead |
+| `GET` | `/leads` | `?classification=Hot&status=new` | List leads (filterable) |
+| `GET` | `/leads/{id}` | — | Get single lead |
+| `PUT` | `/leads/{id}/status` | `{status, classification, score}` | Update lead |
 
-### Getting a Free Groq API Key
+### Conversation
 
-1. Go to [console.groq.com](https://console.groq.com)
-2. Sign up with Google account (free)
-3. Click **API Keys** → **Create Key**
-4. Copy and paste into `backend/.env`
+| Method | Endpoint | Body | Description |
+|---|---|---|---|
+| `POST` | `/conversation/start/{lead_id}` | — | Start call, returns Ana's opening pitch |
+| `POST` | `/conversation/message/{lead_id}` | `{message}` | Send user speech, get Ana's response + updated score |
+| `POST` | `/conversation/end/{lead_id}` | — | End call, trigger summary generation |
+| `GET` | `/conversation/history/{lead_id}` | — | Full transcript with timestamps |
+| `GET` | `/conversation/summary/{lead_id}` | — | Post-call summary object |
 
----
-
-## Setup & Run
-
-### Prerequisites
-
-- Python 3.10+
-- Node.js 18+
-- Chrome browser (required for Web Speech API)
-
-### Backend
-
-```bash
-cd rupeezy-ai-agent/backend
-
-# Copy env file
-cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run backend
-python main.py
-# Backend runs at http://localhost:8000
-```
-
-### Frontend
-
-```bash
-cd rupeezy-ai-agent/frontend
-
-# Install dependencies
-npm install
-
-# Run frontend
-npm run dev
-# Frontend runs at http://localhost:5173
-```
-
-Open [http://localhost:5173](http://localhost:5173) in **Chrome**.
-
----
-
-## How to Use
-
-1. **Dashboard** — View all leads with Hot/Warm/Cold classification and conversion funnel
-2. **Start New Call** — Fill in lead name, phone, and language preference
-3. **Voice Call Screen** — Ana (AI agent) automatically speaks the opening pitch
-4. **Conversation Loop**:
-   - Ana speaks → auto-listens for your response → detects language & objections → responds appropriately → loops
-   - Live interest score updates on screen
-   - Objection alerts appear when detected
-5. **End Call** — Click "End Call" or Ana closes naturally when lead qualifies
-6. **Call Summary** — View post-call summary, RM handoff context, and take action (Transfer to RM / Send WhatsApp / Log for Later)
-
----
-
-## API Endpoints
+### Qualification
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Health check |
-| GET | `/health` | Service status |
-| POST | `/leads` | Create new lead |
-| GET | `/leads` | List all leads (with filter) |
-| GET | `/leads/{id}` | Get single lead |
-| PUT | `/leads/{id}/status` | Update lead status |
-| POST | `/conversation/start/{lead_id}` | Start conversation, get opening |
-| POST | `/conversation/message/{lead_id}` | Send user message, get bot response |
-| POST | `/conversation/end/{lead_id}` | End call, trigger summary generation |
-| GET | `/conversation/history/{lead_id}` | Full conversation transcript |
-| GET | `/conversation/summary/{lead_id}` | Post-call summary |
-| GET | `/analytics/funnel` | Conversion funnel data |
-| GET | `/analytics/summary` | Overall stats |
-| GET | `/analytics/leads/recent` | Last 10 leads |
+|---|---|---|
+| `GET` | `/qualification/score/{lead_id}` | Current score + classification for a lead |
+| `POST` | `/qualification/score/{lead_id}` | Compute score from raw signal dict |
+
+### Analytics
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/analytics/funnel` | Hot/Warm/Cold counts for funnel chart |
+| `GET` | `/analytics/summary` | Total leads, avg score, conversion rate |
+| `GET` | `/analytics/leads/recent` | Last 10 leads by updated_at |
 
 ---
 
 ## Features
 
-- 🗣 **Multilingual Voice** — Hindi, English, Hinglish (auto-detected)
-- 🧠 **Objection Handling** — 5 objections with language-matched rebuttals
-- 📊 **Live Scoring** — Interest score updates in real-time during call
-- 🔥 **Hot/Warm/Cold Classification** — Automatic lead qualification
-- 📋 **Post-Call Summary** — AI-generated summary with RM handoff context
-- 💬 **WhatsApp Integration** — Pre-written messages for Warm leads
+- 🗣 **Multilingual Voice** — Hindi, English, Hinglish auto-detected per lead
+- 🧠 **Objection Handling** — 5 objections with language-matched rebuttals from knowledge base
+- 📊 **Live Scoring** — Interest score updates after every message, visible on screen
+- 🔥 **Hot/Warm/Cold Classification** — Automatic, threshold-based lead qualification
+- 📋 **Post-Call Summary** — AI-generated with key points, RM context, and WhatsApp draft
+- 💬 **WhatsApp Integration** — One-click pre-written message for Warm leads
 - 📈 **Analytics Dashboard** — Conversion funnel and lead source breakdown
+- 🔄 **Full Conversation Transcript** — Every message stored with timestamps and metadata
 - 🆓 **100% Free Stack** — Groq free tier + Web Speech API + open source
 
 ---
+
+## For Developers
+
+See [SETUP.md](SETUP.md) for the complete step-by-step setup guide, API key configuration, and troubleshooting.
+
+---
+
+*RupeezyAI — Because every lead deserves a call.*
 
