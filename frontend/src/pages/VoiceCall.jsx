@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+﻿import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getLead, startConversation, sendMessage, endConversation } from '../services/api'
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis'
@@ -372,7 +372,7 @@ export default function VoiceCall() {
           </div>
 
           <div className="text-center">
-            <p className="text-white font-semibold">Priya</p>
+            <p className="text-white font-semibold">Ana</p>
             <p className="text-slate-400 text-sm">AI Sales Agent · Rupeezy</p>
           </div>
 

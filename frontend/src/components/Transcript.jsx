@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+﻿import { useEffect, useRef } from 'react'
 
 export default function Transcript({ messages }) {
   const endRef = useRef(null)
@@ -25,7 +25,7 @@ export default function Transcript({ messages }) {
             className={`flex flex-col gap-1 ${isBot ? 'items-start' : 'items-end'}`}
           >
             <span className={`text-xs font-mono ${isBot ? 'text-[#00b4ff]' : 'text-[#00e676]'}`}>
-              {isBot ? '🤖 Priya (Agent)' : '👤 Lead'}
+              {isBot ? '🤖 Ana (Agent)' : '👤 Lead'}
             </span>
             <div
               className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed ${

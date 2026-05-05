@@ -1,4 +1,4 @@
-import os
+﻿import os
 import json
 import re
 import random
@@ -395,7 +395,7 @@ CLOSING: Hot lead → connect with RM. Warm lead → send WhatsApp details. Cold
 
         # Sanitize lead name — if it looks like a phone/ID number, use generic address
         display_name = lead_name if lead_name and not re.match(r'^[\d\s\-\+]+$', lead_name.strip()) else ""
-        return f"""You are Priya, a sharp and friendly Rupeezy partner program sales agent on a PHONE CALL{' with ' + display_name if display_name else ''}.
+        return f"""You are Ana, a sharp and friendly Rupeezy partner program sales agent on a PHONE CALL{' with ' + display_name if display_name else ''}.
 
 LANGUAGE: {lang_instruction}
 

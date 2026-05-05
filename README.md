@@ -1,4 +1,4 @@
-# RupeezyAI - AI Voice Agent for Partner Lead Conversion
+﻿# RupeezyAI - AI Voice Agent for Partner Lead Conversion
 
 > An AI-powered browser voice agent that calls leads, pitches Rupeezy's partner program in Hindi/English/Hinglish, handles objections, qualifies leads as Hot/Warm/Cold, and provides an RM dashboard with analytics.
 
@@ -12,7 +12,7 @@ Financial product distribution companies lose significant revenue because human 
 
 ## Solution Overview
 
-RupeezyAI deploys an AI voice agent (Priya) that runs entirely in the browser. Priya calls leads, delivers a personalized pitch in their preferred language (Hindi/English/Hinglish), detects and handles the 5 most common objections using a built-in knowledge base, and scores each lead as Hot/Warm/Cold in real-time. After the call, a post-call summary with RM handoff context and a pre-written WhatsApp message is auto-generated. All data is visible on a live RM dashboard with conversion funnel analytics.
+RupeezyAI deploys an AI voice agent (Ana) that runs entirely in the browser. Ana calls leads, delivers a personalized pitch in their preferred language (Hindi/English/Hinglish), detects and handles the 5 most common objections using a built-in knowledge base, and scores each lead as Hot/Warm/Cold in real-time. After the call, a post-call summary with RM handoff context and a pre-written WhatsApp message is auto-generated. All data is visible on a live RM dashboard with conversion funnel analytics.
 
 ---
 
@@ -126,12 +126,12 @@ Open [http://localhost:5173](http://localhost:5173) in **Chrome**.
 
 1. **Dashboard** — View all leads with Hot/Warm/Cold classification and conversion funnel
 2. **Start New Call** — Fill in lead name, phone, and language preference
-3. **Voice Call Screen** — Priya (AI agent) automatically speaks the opening pitch
+3. **Voice Call Screen** — Ana (AI agent) automatically speaks the opening pitch
 4. **Conversation Loop**:
-   - Priya speaks → auto-listens for your response → detects language & objections → responds appropriately → loops
+   - Ana speaks → auto-listens for your response → detects language & objections → responds appropriately → loops
    - Live interest score updates on screen
    - Objection alerts appear when detected
-5. **End Call** — Click "End Call" or Priya closes naturally when lead qualifies
+5. **End Call** — Click "End Call" or Ana closes naturally when lead qualifies
 6. **Call Summary** — View post-call summary, RM handoff context, and take action (Transfer to RM / Send WhatsApp / Log for Later)
 
 ---
